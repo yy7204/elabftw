@@ -1,0 +1,26 @@
+name: Build and Package eLabFTW Images
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build-images:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Pull MySQL Image
+        run: |
+          docker pull mysql:8.0
+          docker save mysql:8.0 | gzip > mysql-8.0.tar.gz
+
+      - name: Pull eLabFTW Image
+        run: |
+          docker pull elabftw/elabftw:latest
+          docker save elabftw/elabftw:latest | gzip > elabftw-latest.tar.gz
+
+      - name: Upload Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: docker-images
+          path: |
+            mysql-8.0.tar.gz
+            elabftw-latest.tar.gz
