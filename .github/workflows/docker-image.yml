@@ -1,29 +1,26 @@
-name: Package eLabFTW Docker Images
+name: Build and Export Docker Images
 
 on:
-  workflow_dispatch:
+  workflow_dispatch:  # 允许手动触发
 
 jobs:
-  package-images:
+  export-images:
     runs-on: ubuntu-latest
     steps:
-      - name: Login to Docker Hub
-        uses: docker/login-action@v2
-        with:
-          username: ${{ secrets.yy7200 }}
-          password: ${{ secrets.dckr_pat_J02BvY2VVBCkO2X-wBexHo--OVQ }}
+      - name: Checkout
+        uses: actions/checkout@v4
 
-      - name: Pull MySQL Image
+      - name: Pull images
         run: |
           docker pull mysql:8.0
-          docker save mysql:8.0 | gzip > mysql-8.0.tar.gz
-
-      - name: Pull eLabFTW Image
-        run: |
           docker pull elabftw/elabftw:latest
+
+      - name: Save and compress
+        run: |
+          docker save mysql:8.0 | gzip > mysql-8.0.tar.gz
           docker save elabftw/elabftw:latest | gzip > elabftw-latest.tar.gz
 
-      - name: Upload Artifacts
+      - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
           name: docker-images
