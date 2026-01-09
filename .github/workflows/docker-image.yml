@@ -1,35 +1,31 @@
-name: Build and Export Docker Images
+name: Export Docker Images from GHCR
 
 on:
   workflow_dispatch:
 
 jobs:
-  export-images:
+  export:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: read  # 确保有权读 GHCR
+
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+      - name: Pull mysql from Docker Hub
+        run: docker pull mysql:8.0
 
-      - name: Log in to Docker Hub
+      - name: Pull elabftw from GHCR (no login needed)
         run: |
-          echo "${{ secrets.DOCKERHUB_TOKEN }}" | docker login -u yy7200 --password-stdin
-        env:
-          DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
+          docker pull ghcr.io/elabftw/elabftw:latest
+          docker tag ghcr.io/elabftw/elabftw:latest elabftw/elabftw:latest
 
-      - name: Pull images
-        run: |
-          docker pull mysql:8.0
-          docker pull elabftw/elabftw:latest
-
-      - name: Save and compress
+      - name: Save images
         run: |
           docker save mysql:8.0 | gzip > mysql-8.0.tar.gz
           docker save elabftw/elabftw:latest | gzip > elabftw-latest.tar.gz
 
-      - name: Upload artifacts
+      - name: Upload
         uses: actions/upload-artifact@v4
         with:
           name: docker-images
-          path: |
-            mysql-8.0.tar.gz
-            elabftw-latest.tar.gz
+          path: "*.tar.gz"
