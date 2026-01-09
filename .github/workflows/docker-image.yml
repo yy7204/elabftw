@@ -1,4 +1,4 @@
-name: Export Docker Images from GHCR
+name: Export Docker Images
 
 on:
   workflow_dispatch:
@@ -7,24 +7,28 @@ jobs:
   export:
     runs-on: ubuntu-latest
     permissions:
-      contents: read
-      packages: read  # 确保有权读 GHCR
+      packages: read  # 必须显式授权
 
     steps:
-      - name: Pull mysql from Docker Hub
-        run: docker pull mysql:8.0
-
-      - name: Pull elabftw from GHCR (no login needed)
+      - name: Log in to GHCR
         run: |
+          echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+
+      - name: Pull images
+        run: |
+          docker pull mysql:8.0
           docker pull ghcr.io/elabftw/elabftw:latest
+
+      - name: Tag for compatibility (optional)
+        run: |
           docker tag ghcr.io/elabftw/elabftw:latest elabftw/elabftw:latest
 
-      - name: Save images
+      - name: Save and compress
         run: |
           docker save mysql:8.0 | gzip > mysql-8.0.tar.gz
           docker save elabftw/elabftw:latest | gzip > elabftw-latest.tar.gz
 
-      - name: Upload
+      - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
           name: docker-images
