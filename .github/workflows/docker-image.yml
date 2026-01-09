@@ -11,7 +11,7 @@ jobs:
         uses: docker/login-action@v2
         with:
           username: ${{ secrets.yy7200 }}
-          password: ${{ secrets.dckr_pat_H1GJGnnGbM5c6ItuzB1HEMW7lSc }}
+          password: ${{ secrets.dckr_pat_J02BvY2VVBCkO2X-wBexHo--OVQ }}
 
       - name: Pull MySQL Image
         run: |
